@@ -1,0 +1,79 @@
+---
+title: "Practical Machine Learning Project"
+author: "Stevie Slotterback"
+date: "Sunday, Feb 14 2016"
+output: html_document
+---
+
+
+
+```{r,echo=FALSE,warning=FALSE}
+library(caret)
+```
+
+# Load the Data
+
+Let's get the data
+
+```{r}
+pml.training <- read.csv("C:/Users/slotterback/Documents/Practical Machine Learning/pml-training.csv")
+training <- subset(pml.training,select = c(user_name,raw_timestamp_part_1,raw_timestamp_part_2,
++                                            roll_belt,pitch_belt,yaw_belt,total_accel_belt,
++                                            gyros_belt_x,gyros_belt_y,gyros_belt_z,
++                                            accel_belt_x,accel_belt_y,accel_belt_z,
++                                            magnet_belt_x,magnet_belt_y,magnet_belt_z,
++                                            roll_arm,pitch_arm,yaw_arm,total_accel_arm,
++                                            gyros_arm_x,gyros_arm_y,gyros_arm_z,
++                                            accel_arm_x,accel_arm_y,accel_arm_z,
++                                            magnet_arm_x,magnet_arm_y,magnet_arm_z,
++                                            roll_dumbbell,pitch_dumbbell,yaw_dumbbell,total_accel_dumbbell,
++                                            gyros_dumbbell_x,gyros_dumbbell_y,gyros_dumbbell_z,
++                                            accel_dumbbell_x,accel_dumbbell_y,accel_dumbbell_z,
++                                            magnet_dumbbell_x,magnet_dumbbell_y,magnet_dumbbell_z,
++                                            roll_forearm,pitch_forearm,yaw_forearm,total_accel_forearm,
++                                            gyros_forearm_x,gyros_forearm_y,gyros_forearm_z,
++                                            accel_forearm_x,accel_forearm_y,accel_forearm_z,
++                                            magnet_forearm_x,magnet_forearm_y,magnet_forearm_z,
++                                            classe))
+pml.testing <- read.csv("C:/Users/slotterback/Documents/Practical Machine Learning/pml-testing.csv")
+testing <- subset(pml.testing,select = c(user_name,raw_timestamp_part_1,raw_timestamp_part_2,
++                                            roll_belt,pitch_belt,yaw_belt,total_accel_belt,
++                                            gyros_belt_x,gyros_belt_y,gyros_belt_z,
++                                            accel_belt_x,accel_belt_y,accel_belt_z,
++                                            magnet_belt_x,magnet_belt_y,magnet_belt_z,
++                                            roll_arm,pitch_arm,yaw_arm,total_accel_arm,
++                                            gyros_arm_x,gyros_arm_y,gyros_arm_z,
++                                            accel_arm_x,accel_arm_y,accel_arm_z,
++                                            magnet_arm_x,magnet_arm_y,magnet_arm_z,
++                                            roll_dumbbell,pitch_dumbbell,yaw_dumbbell,total_accel_dumbbell,
++                                            gyros_dumbbell_x,gyros_dumbbell_y,gyros_dumbbell_z,
++                                            accel_dumbbell_x,accel_dumbbell_y,accel_dumbbell_z,
++                                            magnet_dumbbell_x,magnet_dumbbell_y,magnet_dumbbell_z,
++                                            roll_forearm,pitch_forearm,yaw_forearm,total_accel_forearm,
++                                            gyros_forearm_x,gyros_forearm_y,gyros_forearm_z,
++                                            accel_forearm_x,accel_forearm_y,accel_forearm_z,
++                                            magnet_forearm_x,magnet_forearm_y,magnet_forearm_z))
+```
+
+Now we are going to build a model with 60% of our training data using the random forests model.  We will use the remaining 40% of the training data to estimate our out of sample error.
+
+```{r}
+set.seed(12345)
+#this is for testing purposes, to see if the page renders correctly.
+inTrain = createDataPartition(training$classe,p=0.60)[[1]]
+my.train <- training[inTrain,]
+my.test <- training[-inTrain,]
+# train the model
+model <- train(classe~., data=my.train, method="rf" )
+# summarize results
+model
+confusionMatrix(my.test$classe,predict(model,my.test))
+
+```
+
+Finally, we will attempt to predict our results for the given test data.
+
+```{r}
+predict(model,testing)
+```
+
